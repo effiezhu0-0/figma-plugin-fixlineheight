@@ -10,6 +10,26 @@ type ApplyPhase2Result = {
   errorMessage?: string;
 };
 
+function hasChildren(node: SceneNode): node is SceneNode & ChildrenMixin {
+  return "children" in node;
+}
+
+function collectTextNodes(node: SceneNode): TextNode[] {
+  if (node.type === "TEXT") {
+    return [node];
+  }
+
+  if (!hasChildren(node)) {
+    return [];
+  }
+
+  const nestedTextNodes: TextNode[] = [];
+  for (const child of node.children) {
+    nestedTextNodes.push(...collectTextNodes(child));
+  }
+  return nestedTextNodes;
+}
+
 async function applyPhase2(): Promise<ApplyPhase2Result> {
   const selection = figma.currentPage.selection;
   if (selection.length === 0) {
@@ -20,7 +40,14 @@ async function applyPhase2(): Promise<ApplyPhase2Result> {
     };
   }
 
-  const textNodes = selection.filter((node): node is TextNode => node.type === "TEXT");
+  const textNodeMap = new Map<string, TextNode>();
+  for (const selectedNode of selection) {
+    for (const textNode of collectTextNodes(selectedNode)) {
+      textNodeMap.set(textNode.id, textNode);
+    }
+  }
+
+  const textNodes = Array.from(textNodeMap.values());
   if (textNodes.length === 0) {
     return {
       updatedCount: 0,
