@@ -70,7 +70,12 @@ export default function App() {
   };
   const handleApply = () => {
     setIsApplying(true);
-    const message: UiToPluginMessage = { type: "apply-phase2" };
+    const message: UiToPluginMessage = {
+      type: "apply-phase2",
+      payload: {
+        applyMultiline
+      }
+    };
     parent.postMessage({ pluginMessage: message }, "*");
   };
 

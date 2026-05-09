@@ -30,7 +30,19 @@ function collectTextNodes(node: SceneNode): TextNode[] {
   return nestedTextNodes;
 }
 
-async function applyPhase2(): Promise<ApplyPhase2Result> {
+function getTargetLineHeight(fontSize: number, isMultiline: boolean, applyMultiline: boolean): number | null {
+  if (!isMultiline) {
+    return fontSize;
+  }
+
+  if (!applyMultiline) {
+    return null;
+  }
+
+  return Math.round(fontSize * 1.618);
+}
+
+async function applyPhase2(applyMultiline: boolean): Promise<ApplyPhase2Result> {
   const selection = figma.currentPage.selection;
   if (selection.length === 0) {
     return {
@@ -64,10 +76,16 @@ async function applyPhase2(): Promise<ApplyPhase2Result> {
         continue;
       }
 
+      const isMultiline = textNode.characters.includes("\n");
+      const targetLineHeight = getTargetLineHeight(textNode.fontSize, isMultiline, applyMultiline);
+      if (targetLineHeight === null) {
+        continue;
+      }
+
       await figma.loadFontAsync(textNode.fontName);
       textNode.lineHeight = {
         unit: "PIXELS",
-        value: textNode.fontSize
+        value: targetLineHeight
       };
       updatedCount += 1;
     } catch (_error) {
@@ -82,7 +100,7 @@ async function applyPhase2(): Promise<ApplyPhase2Result> {
   };
 }
 
-figma.ui.onmessage = async (message: { type?: string }) => {
+figma.ui.onmessage = async (message: { type?: string; payload?: { applyMultiline?: boolean } }) => {
   if (message.type === "phase1-ready") {
     figma.ui.postMessage({ type: "phase1-ack" });
     return;
@@ -90,7 +108,11 @@ figma.ui.onmessage = async (message: { type?: string }) => {
 
   if (message.type === "apply-phase2") {
     try {
-      const result = await applyPhase2();
+      const applyMultiline =
+        message.payload && typeof message.payload.applyMultiline === "boolean"
+          ? message.payload.applyMultiline
+          : true;
+      const result = await applyPhase2(applyMultiline);
       figma.ui.postMessage({
         type: "apply-phase2-result",
         payload: result

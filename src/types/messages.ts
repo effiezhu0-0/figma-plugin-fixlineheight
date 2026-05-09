@@ -1,4 +1,6 @@
-export type UiToPluginMessage = { type: "phase1-ready" } | { type: "apply-phase2" };
+export type UiToPluginMessage =
+  | { type: "phase1-ready" }
+  | { type: "apply-phase2"; payload: { applyMultiline: boolean } };
 
 export type ApplyPhase2Result = {
   updatedCount: number;
