@@ -12,6 +12,12 @@ export type I18nCopy = {
   componentNote: string;
   skipMixed: string;
   apply: string;
+  resultUpdated: string;
+  resultAutoLayout: string;
+  resultSkippedFont: string;
+  resultSkippedMultiline: string;
+  resultSkippedMixed: string;
+  resultSkippedComponent: string;
 };
 
 export const copy: Record<Language, I18nCopy> = {
@@ -26,7 +32,13 @@ export const copy: Record<Language, I18nCopy> = {
     mainComponents: "主组件",
     componentNote: "修改主组件可能影响未修改样式的实例",
     skipMixed: "跳过混合字号",
-    apply: "应用"
+    apply: "应用",
+    resultUpdated: "{n} 个图层已更新",
+    resultAutoLayout: "更新的图层中{n}个在自动布局中，可能改变",
+    resultSkippedFont: "{n} 个跳过（缺失字体）",
+    resultSkippedMultiline: "{n} 个跳过（多行文本已关闭）",
+    resultSkippedMixed: "{n} 个跳过（混合字号）",
+    resultSkippedComponent: "{n} 个跳过（组件设置）"
   },
   en: {
     title: "Line Height Fixer",
@@ -39,6 +51,16 @@ export const copy: Record<Language, I18nCopy> = {
     mainComponents: "Main components",
     componentNote: "Editing main components may affect linked instances",
     skipMixed: "Skip mixed font sizes",
-    apply: "Apply"
+    apply: "Apply",
+    resultUpdated: "{n} layers updated",
+    resultAutoLayout: "{n} of updated layers are in auto layout (layout may shift)",
+    resultSkippedFont: "{n} skipped (missing fonts)",
+    resultSkippedMultiline: "{n} skipped (multi-line disabled)",
+    resultSkippedMixed: "{n} skipped (mixed font sizes)",
+    resultSkippedComponent: "{n} skipped (component settings)"
   }
 };
+
+export function formatResult(template: string, n: number): string {
+  return template.replace(/\{n\}/g, String(n));
+}

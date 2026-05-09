@@ -7,11 +7,17 @@ export type UiToPluginMessage =
         includeComponents: boolean;
         includeInstances: boolean;
         includeMainComponents: boolean;
+        skipMixedFontSizes: boolean;
       };
     };
 
 export type ApplyPhase2Result = {
   updatedCount: number;
+  autoLayoutCount: number;
+  skippedMissingFontCount: number;
+  skippedMultilineCount: number;
+  skippedMixedFontCount: number;
+  skippedComponentCount: number;
   noSelection: boolean;
   noTextFound: boolean;
   errorMessage?: string;

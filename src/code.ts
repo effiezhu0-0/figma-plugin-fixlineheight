@@ -5,6 +5,11 @@ figma.showUI(__html__, {
 
 type ApplyPhase2Result = {
   updatedCount: number;
+  autoLayoutCount: number;
+  skippedMissingFontCount: number;
+  skippedMultilineCount: number;
+  skippedMixedFontCount: number;
+  skippedComponentCount: number;
   noSelection: boolean;
   noTextFound: boolean;
   errorMessage?: string;
@@ -15,6 +20,7 @@ type ApplyPhase2Settings = {
   includeComponents: boolean;
   includeInstances: boolean;
   includeMainComponents: boolean;
+  skipMixedFontSizes: boolean;
 };
 
 type ComponentContext = "none" | "instance" | "main";
@@ -87,11 +93,30 @@ function shouldProcessByComponentSettings(
   return settings.includeMainComponents;
 }
 
+function isInAutoLayout(textNode: TextNode): boolean {
+  let current: BaseNode | null = textNode.parent;
+  while (current) {
+    if ("layoutMode" in current) {
+      const frameLike = current as FrameNode | ComponentNode | InstanceNode;
+      if (frameLike.layoutMode !== "NONE") {
+        return true;
+      }
+    }
+    current = current.parent;
+  }
+  return false;
+}
+
 async function applyPhase2(settings: ApplyPhase2Settings): Promise<ApplyPhase2Result> {
   const selection = figma.currentPage.selection;
   if (selection.length === 0) {
     return {
       updatedCount: 0,
+      autoLayoutCount: 0,
+      skippedMissingFontCount: 0,
+      skippedMultilineCount: 0,
+      skippedMixedFontCount: 0,
+      skippedComponentCount: 0,
       noSelection: true,
       noTextFound: false
     };
@@ -108,35 +133,63 @@ async function applyPhase2(settings: ApplyPhase2Settings): Promise<ApplyPhase2Re
   if (textNodes.length === 0) {
     return {
       updatedCount: 0,
+      autoLayoutCount: 0,
+      skippedMissingFontCount: 0,
+      skippedMultilineCount: 0,
+      skippedMixedFontCount: 0,
+      skippedComponentCount: 0,
       noSelection: false,
       noTextFound: true
     };
   }
 
   let updatedCount = 0;
+  let autoLayoutCount = 0;
+  let skippedMissingFontCount = 0;
+  let skippedMultilineCount = 0;
+  let skippedMixedFontCount = 0;
+  let skippedComponentCount = 0;
 
   for (const textNode of textNodes) {
     try {
-      if (textNode.fontName === figma.mixed || typeof textNode.fontSize !== "number") {
+      if (!shouldProcessByComponentSettings(textNode, settings)) {
+        skippedComponentCount += 1;
         continue;
       }
 
-      if (!shouldProcessByComponentSettings(textNode, settings)) {
+      if (settings.skipMixedFontSizes) {
+        if (textNode.fontName === figma.mixed || textNode.fontSize === figma.mixed) {
+          skippedMixedFontCount += 1;
+          continue;
+        }
+      }
+
+      if (textNode.fontName === figma.mixed || typeof textNode.fontSize !== "number") {
         continue;
       }
 
       const isMultiline = textNode.characters.includes("\n");
       const targetLineHeight = getTargetLineHeight(textNode.fontSize, isMultiline, settings.applyMultiline);
       if (targetLineHeight === null) {
+        skippedMultilineCount += 1;
         continue;
       }
 
-      await figma.loadFontAsync(textNode.fontName);
+      try {
+        await figma.loadFontAsync(textNode.fontName);
+      } catch (_loadError) {
+        skippedMissingFontCount += 1;
+        continue;
+      }
+
       textNode.lineHeight = {
         unit: "PIXELS",
         value: targetLineHeight
       };
       updatedCount += 1;
+      if (isInAutoLayout(textNode)) {
+        autoLayoutCount += 1;
+      }
     } catch (_error) {
       // Keep processing other nodes even if one fails.
     }
@@ -144,6 +197,11 @@ async function applyPhase2(settings: ApplyPhase2Settings): Promise<ApplyPhase2Re
 
   return {
     updatedCount,
+    autoLayoutCount,
+    skippedMissingFontCount,
+    skippedMultilineCount,
+    skippedMixedFontCount,
+    skippedComponentCount,
     noSelection: false,
     noTextFound: false
   };
@@ -156,6 +214,7 @@ figma.ui.onmessage = async (message: {
     includeComponents?: boolean;
     includeInstances?: boolean;
     includeMainComponents?: boolean;
+    skipMixedFontSizes?: boolean;
   };
 }) => {
   if (message.type === "phase1-ready") {
@@ -181,12 +240,17 @@ figma.ui.onmessage = async (message: {
         message.payload && typeof message.payload.includeMainComponents === "boolean"
           ? message.payload.includeMainComponents
           : true;
+      const skipMixedFontSizes =
+        message.payload && typeof message.payload.skipMixedFontSizes === "boolean"
+          ? message.payload.skipMixedFontSizes
+          : false;
 
       const result = await applyPhase2({
         applyMultiline,
         includeComponents,
         includeInstances,
-        includeMainComponents
+        includeMainComponents,
+        skipMixedFontSizes
       });
       figma.ui.postMessage({
         type: "apply-phase2-result",
@@ -197,6 +261,11 @@ figma.ui.onmessage = async (message: {
         type: "apply-phase2-result",
         payload: {
           updatedCount: 0,
+          autoLayoutCount: 0,
+          skippedMissingFontCount: 0,
+          skippedMultilineCount: 0,
+          skippedMixedFontCount: 0,
+          skippedComponentCount: 0,
           noSelection: false,
           noTextFound: false,
           errorMessage: "Unexpected error."

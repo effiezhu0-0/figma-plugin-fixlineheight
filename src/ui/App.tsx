@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ApplyPhase2Result, PluginToUiMessage, UiToPluginMessage } from "../types/messages";
-import { copy, type Language } from "./i18n";
+import { copy, formatResult, type Language } from "./i18n";
 import "./styles/app.css";
 
 type CheckboxProps = {
@@ -76,7 +76,8 @@ export default function App() {
         applyMultiline,
         includeComponents,
         includeInstances,
-        includeMainComponents
+        includeMainComponents,
+        skipMixedFontSizes
       }
     };
     parent.postMessage({ pluginMessage: message }, "*");
@@ -102,9 +103,6 @@ export default function App() {
 
   const noSelectionText = isZh ? "请选择1个图层" : "Please select a layer to start";
   const noTextText = isZh ? "未选中文本图层" : "No text layers selected";
-  const successText = isZh
-    ? `${result?.updatedCount ?? 0} 个图层已更新`
-    : `${result?.updatedCount ?? 0} layers updated`;
 
   return (
     <main className="panel">
@@ -172,13 +170,62 @@ export default function App() {
 
       {result?.noSelection ? <p className="alert-text">{noSelectionText}</p> : null}
       {result?.noTextFound ? <p className="alert-text">{noTextText}</p> : null}
-      {result && !result.noSelection && !result.noTextFound && result.updatedCount > 0 ? (
-        <section className="result-card">
-          <div className="result-row">
-            <span className="result-dot" aria-hidden="true" />
-            <p className="result-text">{successText}</p>
-          </div>
-        </section>
+      {result && !result.noSelection && !result.noTextFound ? (
+        result.updatedCount > 0 ||
+        result.autoLayoutCount > 0 ||
+        result.skippedMissingFontCount > 0 ||
+        result.skippedMultilineCount > 0 ||
+        result.skippedMixedFontCount > 0 ||
+        result.skippedComponentCount > 0 ? (
+          <section className="result-card">
+            {result.updatedCount > 0 ? (
+              <div className="result-row">
+                <span className="result-dot" aria-hidden="true" />
+                <p className="result-text">{formatResult(text.resultUpdated, result.updatedCount)}</p>
+              </div>
+            ) : null}
+            {result.autoLayoutCount > 0 ? (
+              <div className="result-row result-row--warn">
+                <span className="result-dot result-dot--warn" aria-hidden="true" />
+                <p className="result-text result-text--warn">
+                  {formatResult(text.resultAutoLayout, result.autoLayoutCount)}
+                </p>
+              </div>
+            ) : null}
+            {result.skippedMissingFontCount > 0 ? (
+              <div className="result-row result-row--skip">
+                <span className="result-dot result-dot--skip" aria-hidden="true" />
+                <p className="result-text result-text--skip">
+                  {formatResult(text.resultSkippedFont, result.skippedMissingFontCount)}
+                </p>
+              </div>
+            ) : null}
+            {result.skippedMultilineCount > 0 ? (
+              <div className="result-row result-row--skip">
+                <span className="result-dot result-dot--skip" aria-hidden="true" />
+                <p className="result-text result-text--skip">
+                  {formatResult(text.resultSkippedMultiline, result.skippedMultilineCount)}
+                </p>
+              </div>
+            ) : null}
+            {result.skippedMixedFontCount > 0 ? (
+              <div className="result-row result-row--skip">
+                <span className="result-dot result-dot--skip" aria-hidden="true" />
+                <p className="result-text result-text--skip">
+                  {formatResult(text.resultSkippedMixed, result.skippedMixedFontCount)}
+                </p>
+              </div>
+            ) : null}
+            {result.skippedComponentCount > 0 ? (
+              <div className="result-row result-row--skip">
+                <span className="result-dot result-dot--skip" aria-hidden="true" />
+                <p className="result-text result-text--skip">
+                  {formatResult(text.resultSkippedComponent, result.skippedComponentCount)}
+                </p>
+              </div>
+            ) : null}
+          </section>
+        ) : null
       ) : null}
       {result?.errorMessage ? <p className="alert-text">{result.errorMessage}</p> : null}
     </main>

@@ -239,6 +239,9 @@ body {
   background: #f4f7f9;
   border-radius: 6px;
   padding: 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .result-row {
@@ -252,6 +255,7 @@ body {
   height: 6px;
   border-radius: 999px;
   background: #00cf62;
+  flex-shrink: 0;
 }
 
 .result-text {
@@ -260,4 +264,22 @@ body {
   font-size: 11px;
   line-height: 11px;
   font-weight: 500;
+}
+
+.result-dot--warn {
+  background: #f7b500;
+}
+
+.result-text--warn {
+  color: #c98600;
+  font-weight: 400;
+}
+
+.result-dot--skip {
+  background: #909799;
+}
+
+.result-text--skip {
+  color: #63686a;
+  font-weight: 400;
 }
