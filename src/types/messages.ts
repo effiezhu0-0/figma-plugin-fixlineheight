@@ -1,7 +1,15 @@
-export type UiToPluginMessage = {
-  type: "phase1-ready";
+export type UiToPluginMessage = { type: "phase1-ready" } | { type: "apply-phase2" };
+
+export type ApplyPhase2Result = {
+  updatedCount: number;
+  noSelection: boolean;
+  noTextFound: boolean;
+  errorMessage?: string;
 };
 
-export type PluginToUiMessage = {
-  type: "phase1-ack";
-};
+export type PluginToUiMessage =
+  | { type: "phase1-ack" }
+  | {
+      type: "apply-phase2-result";
+      payload: ApplyPhase2Result;
+    };

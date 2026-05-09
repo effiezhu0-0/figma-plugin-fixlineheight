@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { ApplyPhase2Result, PluginToUiMessage, UiToPluginMessage } from "../types/messages";
 import { copy, type Language } from "./i18n";
 import "./styles/app.css";
 
@@ -52,6 +53,8 @@ export default function App() {
   const [includeInstances, setIncludeInstances] = useState(true);
   const [includeMainComponents, setIncludeMainComponents] = useState(true);
   const [skipMixedFontSizes, setSkipMixedFontSizes] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+  const [result, setResult] = useState<ApplyPhase2Result | null>(null);
 
   const text = useMemo(() => copy[language], [language]);
   const isZh = language === "zh";
@@ -65,6 +68,35 @@ export default function App() {
     setIncludeInstances(false);
     setIncludeMainComponents(false);
   };
+  const handleApply = () => {
+    setIsApplying(true);
+    const message: UiToPluginMessage = { type: "apply-phase2" };
+    parent.postMessage({ pluginMessage: message }, "*");
+  };
+
+  useEffect(() => {
+    window.onmessage = (event: MessageEvent<{ pluginMessage?: PluginToUiMessage }>) => {
+      const message = event.data.pluginMessage;
+      if (!message) {
+        return;
+      }
+
+      if (message.type === "apply-phase2-result") {
+        setIsApplying(false);
+        setResult(message.payload);
+      }
+    };
+
+    return () => {
+      window.onmessage = null;
+    };
+  }, []);
+
+  const noSelectionText = isZh ? "请选择1个图层" : "Please select a layer to start";
+  const noTextText = isZh ? "未选中文本图层" : "No text layers selected";
+  const successText = isZh
+    ? `${result?.updatedCount ?? 0} 个图层已更新`
+    : `${result?.updatedCount ?? 0} layers updated`;
 
   return (
     <main className="panel">
@@ -125,9 +157,21 @@ export default function App() {
         </div>
       </section>
 
-      <button type="button" className="cta">
+      <button type="button" className="cta" onClick={handleApply} disabled={isApplying}>
         {text.apply}
       </button>
+
+      {result?.noSelection ? <p className="alert-text">{noSelectionText}</p> : null}
+      {result?.noTextFound ? <p className="alert-text">{noTextText}</p> : null}
+      {result && !result.noSelection && !result.noTextFound && result.updatedCount > 0 ? (
+        <section className="result-card">
+          <div className="result-row">
+            <span className="result-dot" aria-hidden="true" />
+            <p className="result-text">{successText}</p>
+          </div>
+        </section>
+      ) : null}
+      {result?.errorMessage ? <p className="alert-text">{result.errorMessage}</p> : null}
     </main>
   );
 }

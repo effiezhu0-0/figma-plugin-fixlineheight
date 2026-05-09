@@ -208,3 +208,45 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
+
+.cta:disabled {
+  opacity: 0.75;
+  cursor: default;
+}
+
+.alert-text {
+  margin: 0;
+  text-align: center;
+  color: #c80000;
+  font-size: 11px;
+  line-height: 11px;
+  font-weight: 500;
+}
+
+.result-card {
+  border: 1px solid #dde2e6;
+  background: #f4f7f9;
+  border-radius: 6px;
+  padding: 17px;
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #00cf62;
+}
+
+.result-text {
+  margin: 0;
+  color: #068e46;
+  font-size: 11px;
+  line-height: 11px;
+  font-weight: 500;
+}
