@@ -1,0 +1,7 @@
+{
+  "name": "Line Height Fixer",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/index.html",
+  "editorType": ["figma"]
+}
