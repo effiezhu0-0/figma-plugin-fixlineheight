@@ -73,7 +73,10 @@ export default function App() {
     const message: UiToPluginMessage = {
       type: "apply-phase2",
       payload: {
-        applyMultiline
+        applyMultiline,
+        includeComponents,
+        includeInstances,
+        includeMainComponents
       }
     };
     parent.postMessage({ pluginMessage: message }, "*");
@@ -153,6 +156,7 @@ export default function App() {
             disabled={!includeComponents}
             className="check-control--sub"
           />
+          <p className="component-note">{text.componentNote}</p>
 
           <Checkbox
             checked={skipMixedFontSizes}

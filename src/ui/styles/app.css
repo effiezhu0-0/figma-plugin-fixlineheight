@@ -123,6 +123,17 @@ body {
   margin-left: 26px;
 }
 
+.component-note {
+  margin: 0;
+  margin-left: 52px;
+  margin-top: -4px;
+  max-width: calc(100% - 52px);
+  font-size: 10px;
+  line-height: 10px;
+  font-weight: 500;
+  color: #98a0a5;
+}
+
 .check-control--disabled {
   cursor: default;
   opacity: 0.6;

@@ -9,6 +9,7 @@ export type I18nCopy = {
   includeComponents: string;
   instances: string;
   mainComponents: string;
+  componentNote: string;
   skipMixed: string;
   apply: string;
 };
@@ -23,6 +24,7 @@ export const copy: Record<Language, I18nCopy> = {
     includeComponents: "包含组件",
     instances: "实例",
     mainComponents: "主组件",
+    componentNote: "修改主组件可能影响未修改样式的实例",
     skipMixed: "跳过混合字号",
     apply: "应用"
   },
@@ -35,6 +37,7 @@ export const copy: Record<Language, I18nCopy> = {
     includeComponents: "Include components",
     instances: "Instances",
     mainComponents: "Main components",
+    componentNote: "Editing main components may affect linked instances",
     skipMixed: "Skip mixed font sizes",
     apply: "Apply"
   }
