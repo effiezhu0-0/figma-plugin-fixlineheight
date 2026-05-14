@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ApplyPhase2Result, PluginToUiMessage, UiToPluginMessage } from "../types/messages";
 import { copy, formatResult, type Language } from "./i18n";
+import effieAvatarUrl from "./assets/effie-avatar.png";
 import "./styles/app.css";
 
 type CheckboxProps = {
@@ -68,6 +69,7 @@ export default function App() {
   const [lineHeightPercentInput, setLineHeightPercentInput] = useState("100");
   const [isApplying, setIsApplying] = useState(false);
   const [result, setResult] = useState<ApplyPhase2Result | null>(null);
+  const ctaButtonRef = useRef<HTMLButtonElement>(null);
 
   const text = useMemo(() => copy[language], [language]);
   const isZh = language === "zh";
@@ -106,8 +108,27 @@ export default function App() {
       }
 
       if (message.type === "apply-phase2-result") {
+        const payload = message.payload;
         setIsApplying(false);
-        setResult(message.payload);
+        setResult(payload);
+
+        const shouldAnimate =
+          !payload.noSelection && !payload.noTextFound && payload.updatedCount > 0;
+
+        if (shouldAnimate) {
+          const runShimmer = () => {
+            const el = ctaButtonRef.current;
+            if (!el) {
+              return;
+            }
+            el.classList.remove("cta--shimmer");
+            void el.offsetWidth;
+            el.classList.add("cta--shimmer");
+          };
+          requestAnimationFrame(() => {
+            requestAnimationFrame(runShimmer);
+          });
+        }
       }
     };
 
@@ -209,7 +230,19 @@ export default function App() {
         </div>
       </section>
 
-      <button type="button" className="cta" onClick={handleApply} disabled={isApplying}>
+      <button
+        ref={ctaButtonRef}
+        type="button"
+        className="cta"
+        onClick={handleApply}
+        disabled={isApplying}
+        onAnimationEnd={(event) => {
+          if (event.animationName !== "cta-gradient-shimmer") {
+            return;
+          }
+          event.currentTarget.classList.remove("cta--shimmer");
+        }}
+      >
         {text.apply}
       </button>
 
@@ -273,6 +306,13 @@ export default function App() {
         ) : null
       ) : null}
       {result?.errorMessage ? <p className="alert-text">{result.errorMessage}</p> : null}
+
+      <footer className="plugin-footer">
+        <div className="plugin-footer__avatar-wrap" aria-hidden="true">
+          <img className="plugin-footer__avatar" src={effieAvatarUrl} alt="" width={20} height={20} />
+        </div>
+        <p className="plugin-footer__text">Made by Effie Zhu · 2026 · v1.0</p>
+      </footer>
     </main>
   );
 }

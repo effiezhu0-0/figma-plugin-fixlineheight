@@ -13,6 +13,8 @@ body,
   width: 100%;
   min-height: 100%;
   background: #ffffff;
+  display: flex;
+  flex-direction: column;
 }
 
 body {
@@ -21,10 +23,13 @@ body {
 
 .panel {
   width: 100%;
+  flex: 1 0 auto;
+  min-height: 100%;
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-sizing: border-box;
 }
 
 .lang-row {
@@ -285,11 +290,39 @@ body {
   border: none;
   border-radius: 6px;
   background: #18a0fb;
+  background-image: none;
   color: #ffffff;
   font-size: 12px;
   line-height: 12px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.cta.cta--shimmer {
+  background-color: rgb(78, 96, 255);
+  background-image: linear-gradient(
+    84.16deg,
+    rgb(105, 167, 255) 0.23%,
+    rgb(78, 96, 255) 42.92%,
+    rgb(135, 30, 255) 100%
+  );
+  background-size: 240% 100%;
+  background-position: 0% 50%;
+  background-repeat: no-repeat;
+  box-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.1);
+  animation: cta-gradient-shimmer 0.5s ease-in-out;
+}
+
+@keyframes cta-gradient-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .cta:disabled {
@@ -354,4 +387,39 @@ body {
 .result-text--skip {
   color: #63686a;
   font-weight: 400;
+}
+
+/* Footer — matches Figma node 82:2674 */
+.plugin-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.plugin-footer__avatar-wrap {
+  width: 20px;
+  height: 20px;
+  border-radius: 3.333px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.plugin-footer__avatar {
+  display: block;
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+}
+
+.plugin-footer__text {
+  margin: 0;
+  font-family: Inter, "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 9px;
+  line-height: 9px;
+  font-weight: 400;
+  letter-spacing: 0.0645px;
+  color: #98a0a5;
+  white-space: nowrap;
 }
