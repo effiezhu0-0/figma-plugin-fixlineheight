@@ -12,6 +12,18 @@ type CheckboxProps = {
   className?: string;
 };
 
+function parseLineHeightPercentForPayload(input: string): number {
+  const trimmed = input.trim();
+  if (trimmed === "") {
+    return 100;
+  }
+  const n = parseFloat(trimmed.replace(/[^\d.-]/g, ""));
+  if (isNaN(n) || !isFinite(n)) {
+    return 100;
+  }
+  return Math.min(300, Math.max(50, Math.round(n)));
+}
+
 function Checkbox({ checked, onChange, disabled = false, label, hint, className }: CheckboxProps) {
   const classes = [
     "checkbox",
@@ -53,6 +65,7 @@ export default function App() {
   const [includeInstances, setIncludeInstances] = useState(true);
   const [includeMainComponents, setIncludeMainComponents] = useState(true);
   const [skipMixedFontSizes, setSkipMixedFontSizes] = useState(false);
+  const [lineHeightPercentInput, setLineHeightPercentInput] = useState("100");
   const [isApplying, setIsApplying] = useState(false);
   const [result, setResult] = useState<ApplyPhase2Result | null>(null);
 
@@ -70,9 +83,11 @@ export default function App() {
   };
   const handleApply = () => {
     setIsApplying(true);
+    const lineHeightPercent = parseLineHeightPercentForPayload(lineHeightPercentInput);
     const message: UiToPluginMessage = {
       type: "apply-phase2",
       payload: {
+        lineHeightPercent,
         applyMultiline,
         includeComponents,
         includeInstances,
@@ -126,12 +141,36 @@ export default function App() {
       <section className="card" aria-label={text.preference}>
         <div className="card__header">{text.preference}</div>
         <div className="card__body">
+          <div className="percent-section">
+            <div className="percent-row">
+              <span className="percent-row__label">{text.lineHeightPercentLabel}</span>
+              <div className="percent-row__field">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="percent-input"
+                  value={lineHeightPercentInput}
+                  onChange={(event) => {
+                    const digitsOnly = event.target.value.replace(/[^\d]/g, "");
+                    setLineHeightPercentInput(digitsOnly);
+                  }}
+                  onBlur={() => {
+                    if (lineHeightPercentInput.trim() === "") {
+                      setLineHeightPercentInput("100");
+                    }
+                  }}
+                  aria-label={text.lineHeightPercentLabel}
+                />
+                <span className="percent-suffix">%</span>
+              </div>
+            </div>
+            <hr className="preference-divider" />
+          </div>
+
           <Checkbox
             checked={applyMultiline}
             onChange={setApplyMultiline}
             label={text.applyMultiline}
-            hint={text.applyMultilineHint}
-            className="check-control--top"
           />
 
           <Checkbox
@@ -154,7 +193,13 @@ export default function App() {
             disabled={!includeComponents}
             className="check-control--sub"
           />
-          <p className="component-note">{text.componentNote}</p>
+          <p
+            className={["component-note", !includeComponents ? "component-note--disabled" : ""]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            {text.componentNote}
+          </p>
 
           <Checkbox
             checked={skipMixedFontSizes}

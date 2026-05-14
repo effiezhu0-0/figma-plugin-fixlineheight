@@ -16,6 +16,7 @@ type ApplyPhase2Result = {
 };
 
 type ApplyPhase2Settings = {
+  lineHeightPercent: number;
   applyMultiline: boolean;
   includeComponents: boolean;
   includeInstances: boolean;
@@ -45,16 +46,28 @@ function collectTextNodes(node: SceneNode): TextNode[] {
   return nestedTextNodes;
 }
 
-function getTargetLineHeight(fontSize: number, isMultiline: boolean, applyMultiline: boolean): number | null {
-  if (!isMultiline) {
-    return fontSize;
+function normalizeLineHeightPercent(raw: unknown): number {
+  var n = 100;
+  if (typeof raw === "number" && !isNaN(raw) && isFinite(raw)) {
+    n = raw;
+  } else if (typeof raw === "string") {
+    var trimmed = raw.replace(/^\s+|\s+$/g, "");
+    if (trimmed.length === 0) {
+      return 100;
+    }
+    var parsed = parseFloat(trimmed);
+    if (isNaN(parsed) || !isFinite(parsed)) {
+      return 100;
+    }
+    n = parsed;
   }
-
-  if (!applyMultiline) {
-    return null;
+  if (n < 50) {
+    return 50;
   }
-
-  return Math.round(fontSize * 1.618);
+  if (n > 300) {
+    return 300;
+  }
+  return Math.round(n);
 }
 
 function getComponentContext(textNode: TextNode): ComponentContext {
@@ -168,9 +181,8 @@ async function applyPhase2(settings: ApplyPhase2Settings): Promise<ApplyPhase2Re
         continue;
       }
 
-      const isMultiline = textNode.characters.includes("\n");
-      const targetLineHeight = getTargetLineHeight(textNode.fontSize, isMultiline, settings.applyMultiline);
-      if (targetLineHeight === null) {
+      const isMultiline = textNode.characters.indexOf("\n") !== -1;
+      if (isMultiline && !settings.applyMultiline) {
         skippedMultilineCount += 1;
         continue;
       }
@@ -182,9 +194,10 @@ async function applyPhase2(settings: ApplyPhase2Settings): Promise<ApplyPhase2Re
         continue;
       }
 
+      const percentValue = settings.lineHeightPercent;
       textNode.lineHeight = {
-        unit: "PIXELS",
-        value: targetLineHeight
+        unit: "PERCENT",
+        value: percentValue
       };
       updatedCount += 1;
       if (isInAutoLayout(textNode)) {
@@ -210,6 +223,7 @@ async function applyPhase2(settings: ApplyPhase2Settings): Promise<ApplyPhase2Re
 figma.ui.onmessage = async (message: {
   type?: string;
   payload?: {
+    lineHeightPercent?: number;
     applyMultiline?: boolean;
     includeComponents?: boolean;
     includeInstances?: boolean;
@@ -224,6 +238,12 @@ figma.ui.onmessage = async (message: {
 
   if (message.type === "apply-phase2") {
     try {
+      const lineHeightPercentRaw =
+        message.payload && typeof message.payload.lineHeightPercent === "number"
+          ? message.payload.lineHeightPercent
+          : 100;
+      const lineHeightPercent = normalizeLineHeightPercent(lineHeightPercentRaw);
+
       const applyMultiline =
         message.payload && typeof message.payload.applyMultiline === "boolean"
           ? message.payload.applyMultiline
@@ -246,6 +266,7 @@ figma.ui.onmessage = async (message: {
           : false;
 
       const result = await applyPhase2({
+        lineHeightPercent,
         applyMultiline,
         includeComponents,
         includeInstances,

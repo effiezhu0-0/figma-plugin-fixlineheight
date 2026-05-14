@@ -3,6 +3,7 @@ export type UiToPluginMessage =
   | {
       type: "apply-phase2";
       payload: {
+        lineHeightPercent: number;
         applyMultiline: boolean;
         includeComponents: boolean;
         includeInstances: boolean;
