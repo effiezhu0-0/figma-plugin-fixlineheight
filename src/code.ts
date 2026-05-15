@@ -1,6 +1,6 @@
 figma.showUI(__html__, {
   width: 360,
-  height: 560
+  height: 600
 });
 
 type ApplyPhase2Result = {
@@ -120,6 +120,65 @@ function isInAutoLayout(textNode: TextNode): boolean {
   return false;
 }
 
+/** Load every font used on the node (needed when `fontName` is mixed). */
+async function loadAllFontsForTextNode(textNode: TextNode): Promise<boolean> {
+  if (textNode.fontName !== figma.mixed) {
+    try {
+      await figma.loadFontAsync(textNode.fontName);
+      return true;
+    } catch (_e) {
+      return false;
+    }
+  }
+
+  const segments = textNode.getStyledTextSegments(["fontName"]);
+  const seen = new Set<string>();
+
+  for (const segment of segments) {
+    const key = segment.fontName.family + "\0" + segment.fontName.style;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    try {
+      await figma.loadFontAsync(segment.fontName);
+    } catch (_e) {
+      return false;
+    }
+  }
+
+  return seen.size > 0;
+}
+
+type MixedFontSizeResolution = {
+  maxFontSize: number;
+};
+
+/**
+ * Uses TextNode range/segment APIs (`getStyledTextSegments`) to find the largest
+ * `fontSize` when the node-level `fontSize` is `figma.mixed`.
+ */
+function resolveMixedFontSizeMetrics(textNode: TextNode): MixedFontSizeResolution | null {
+  if (textNode.characters.length === 0) {
+    return null;
+  }
+
+  const segments = textNode.getStyledTextSegments(["fontSize", "fontName"]);
+  let maxFontSize = 0;
+
+  for (const segment of segments) {
+    if (typeof segment.fontSize === "number") {
+      maxFontSize = Math.max(maxFontSize, segment.fontSize);
+    }
+  }
+
+  if (maxFontSize <= 0) {
+    return null;
+  }
+
+  return { maxFontSize };
+}
+
 async function applyPhase2(settings: ApplyPhase2Settings): Promise<ApplyPhase2Result> {
   const selection = figma.currentPage.selection;
   if (selection.length === 0) {
@@ -177,24 +236,47 @@ async function applyPhase2(settings: ApplyPhase2Settings): Promise<ApplyPhase2Re
         }
       }
 
-      if (textNode.fontName === figma.mixed || typeof textNode.fontSize !== "number") {
-        continue;
-      }
-
       const isMultiline = textNode.characters.indexOf("\n") !== -1;
       if (isMultiline && !settings.applyMultiline) {
         skippedMultilineCount += 1;
         continue;
       }
 
-      try {
-        await figma.loadFontAsync(textNode.fontName);
-      } catch (_loadError) {
+      const percentValue = settings.lineHeightPercent;
+
+      if (textNode.fontSize === figma.mixed) {
+        const resolved = resolveMixedFontSizeMetrics(textNode);
+        if (!resolved) {
+          continue;
+        }
+
+        const fontsLoaded = await loadAllFontsForTextNode(textNode);
+        if (!fontsLoaded) {
+          skippedMissingFontCount += 1;
+          continue;
+        }
+
+        textNode.lineHeight = {
+          unit: "PIXELS",
+          value: Math.round((resolved.maxFontSize * percentValue) / 100)
+        };
+        updatedCount += 1;
+        if (isInAutoLayout(textNode)) {
+          autoLayoutCount += 1;
+        }
+        continue;
+      }
+
+      if (textNode.fontName === figma.mixed || typeof textNode.fontSize !== "number") {
+        continue;
+      }
+
+      const fontsLoaded = await loadAllFontsForTextNode(textNode);
+      if (!fontsLoaded) {
         skippedMissingFontCount += 1;
         continue;
       }
 
-      const percentValue = settings.lineHeightPercent;
       textNode.lineHeight = {
         unit: "PERCENT",
         value: percentValue
@@ -263,7 +345,7 @@ figma.ui.onmessage = async (message: {
       const skipMixedFontSizes =
         message.payload && typeof message.payload.skipMixedFontSizes === "boolean"
           ? message.payload.skipMixedFontSizes
-          : false;
+          : true;
 
       const result = await applyPhase2({
         lineHeightPercent,

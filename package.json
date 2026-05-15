@@ -1,7 +1,7 @@
 {
-  "name": "line-height-fixer",
+  "name": "lineflow",
   "version": "1.0.0",
-  "description": "Line Height Fixer Figma plugin",
+  "description": "LineFlow — Figma plugin (行高编辑器)",
   "main": "dist/code.js",
   "scripts": {
     "dev": "vite build --watch",

@@ -1,4 +1,7 @@
-# Line Height Fixer
+# LineFlow
+
+**English:** LineFlow  
+**中文:** 行高编辑器
 
 A Figma plugin to quickly unify text line height across selected layers, frames, and components.
 
@@ -8,35 +11,35 @@ Built for UI/UX designers who want cleaner typography workflows with fewer manua
 
 ## Features
 
-### Smart Line Height Adjustment
+### Smart line height adjustment
 - Set line height using percentage values
 
-### Multi-line Support
+### Multi-line support
 Supports both:
 - Single-line text
 - Multi-line text
 
-### Component-aware Processing
+### Component-aware processing
 Choose whether to process:
 - Instances
 - Main components
 
 Helps avoid accidental component-wide changes.
 
-### Detailed Result Feedback
+### Detailed result feedback
 Shows:
 - Updated text count
 - Warnings
 - Skips due to missing font, mixed font, etc.
 
-### Lightweight & Native
+### Lightweight & native
 - Designed specifically for Figma workflows
 - Fast and minimal UI
 - Bilingual support (中文 / EN)
 
 ---
 
-## How to Use
+## How to use
 
 1. Open the plugin
 2. Select text layers, frames, or groups in Figma
@@ -47,9 +50,9 @@ The plugin will automatically process all supported text layers in the selection
 
 ---
 
-## Preference Options
+## Preference options
 
-### Line Height Percentage
+### Line height percentage
 Set line height in percentage.
 
 Examples:
@@ -57,15 +60,15 @@ Examples:
 - `140` → 140%
 - `160` → 160%
 
-### Apply to Multi-line Text
+### Apply to multi-line text
 Enable or disable multi-line text processing.
 
-### Include Components
+### Include components
 Choose whether to process:
 - Instances
 - Main components
 
-### Skip Mixed Font Sizes
+### Skip mixed font sizes
 Skip text layers using mixed font sizes.
 
 ---

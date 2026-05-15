@@ -1,5 +1,5 @@
 {
-  "name": "Line Height Fixer",
+  "name": "LineFlow",
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": "dist/index.html",

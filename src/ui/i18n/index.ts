@@ -18,6 +18,7 @@ export type I18nCopy = {
   resultSkippedMultiline: string;
   resultSkippedMixed: string;
   resultSkippedComponent: string;
+  footerCredit: string;
 };
 
 export const copy: Record<Language, I18nCopy> = {
@@ -38,10 +39,11 @@ export const copy: Record<Language, I18nCopy> = {
     resultSkippedFont: "{n} 个跳过（缺失字体）",
     resultSkippedMultiline: "{n} 个跳过（多行文本已关闭）",
     resultSkippedMixed: "{n} 个跳过（混合字号）",
-    resultSkippedComponent: "{n} 个跳过（组件设置）"
+    resultSkippedComponent: "{n} 个跳过（组件设置）",
+    footerCredit: "LineFlow · Made by Effie Zhu · 2026 · v1.0"
   },
   en: {
-    title: "Line Height Fixer",
+    title: "LineFlow",
     subtitle: "Apply a unified line-height percentage to text",
     preference: "Preference",
     lineHeightPercentLabel: "Line height percentage",
@@ -57,7 +59,8 @@ export const copy: Record<Language, I18nCopy> = {
     resultSkippedFont: "{n} skipped (missing fonts)",
     resultSkippedMultiline: "{n} skipped (multi-line disabled)",
     resultSkippedMixed: "{n} skipped (mixed font sizes)",
-    resultSkippedComponent: "{n} skipped (component settings)"
+    resultSkippedComponent: "{n} skipped (component settings)",
+    footerCredit: "LineFlow · Made by Effie Zhu · 2026 · v1.0"
   }
 };
 

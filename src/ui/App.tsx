@@ -65,7 +65,7 @@ export default function App() {
   const [includeComponents, setIncludeComponents] = useState(true);
   const [includeInstances, setIncludeInstances] = useState(true);
   const [includeMainComponents, setIncludeMainComponents] = useState(true);
-  const [skipMixedFontSizes, setSkipMixedFontSizes] = useState(false);
+  const [skipMixedFontSizes, setSkipMixedFontSizes] = useState(true);
   const [lineHeightPercentInput, setLineHeightPercentInput] = useState("100");
   const [isApplying, setIsApplying] = useState(false);
   const [result, setResult] = useState<ApplyPhase2Result | null>(null);
@@ -311,7 +311,7 @@ export default function App() {
         <div className="plugin-footer__avatar-wrap" aria-hidden="true">
           <img className="plugin-footer__avatar" src={effieAvatarUrl} alt="" width={20} height={20} />
         </div>
-        <p className="plugin-footer__text">Made by Effie Zhu · 2026 · v1.0</p>
+        <p className="plugin-footer__text">{text.footerCredit}</p>
       </footer>
     </main>
   );

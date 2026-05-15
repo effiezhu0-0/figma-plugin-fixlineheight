@@ -25,7 +25,7 @@ body {
   width: 100%;
   flex: 1 0 auto;
   min-height: 100%;
-  padding: 24px;
+  padding: 24px 24px 16px 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -340,13 +340,14 @@ body {
 }
 
 .result-card {
-  border: 1px solid #dde2e6;
-  background: #f4f7f9;
+  border: 1px solid #f5f8fa;
+  background: #fafbfc;
   border-radius: 6px;
-  padding: 17px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-bottom: 8px;
 }
 
 .result-row {
