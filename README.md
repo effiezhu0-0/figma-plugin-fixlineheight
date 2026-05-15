@@ -7,8 +7,6 @@ A Figma plugin to unify text line height across selected layers, frames, and com
 
 Built for UI/UX designers who want cleaner typography workflows with fewer manual adjustments.
 
----
-
 ## Features
 
 ### Smart line height adjustment
@@ -37,7 +35,6 @@ Shows:
 - Fast and minimal UI
 - Bilingual support (中文 / EN)
 
----
 
 ## How to use
 
@@ -48,7 +45,6 @@ Shows:
 
 The plugin will automatically process all supported text layers in the selection.
 
----
 
 ## Preference options
 
@@ -71,7 +67,6 @@ Choose whether to process:
 ### Skip mixed font sizes
 Skip text layers using mixed font sizes.
 
----
 
 ## Notes
 
@@ -79,13 +74,11 @@ Editing main components may affect linked instances that have not overridden sty
 
 Mixed font-size text is currently skipped for stability and consistency.
 
----
 
 ## Version
 
 `v1.0`
 
----
 
 ## Made by
 
