@@ -1,6 +1,6 @@
 figma.showUI(__html__, {
   width: 360,
-  height: 600
+  height: 640
 });
 
 type ApplyPhase2Result = {
