@@ -3,7 +3,7 @@
 **English:** LineFlow  
 **中文:** 行高编辑器
 
-A Figma plugin to quickly unify text line height across selected layers, frames, and components.
+A Figma plugin to unify text line height across selected layers, frames, and components with one click.
 
 Built for UI/UX designers who want cleaner typography workflows with fewer manual adjustments.
 
